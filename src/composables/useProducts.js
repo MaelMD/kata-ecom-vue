@@ -4,7 +4,7 @@ export function useProducts() {
   const products = ref([]);
   const loading = ref(false);
   const error = ref(null);
-  const cart = reactive(new Map());
+  const cart = reactive({});
 
   const fetchProducts = async () => {
     loading.value = true;
@@ -19,39 +19,39 @@ export function useProducts() {
   };
 
   const addToCart = (product) => {
-    if (cart.has(product.id)) {
-      const existingProduct = cart.get(product.id);
-      existingProduct.quantity++;
+    let productToAdd = cart[product.id];
+    if (productToAdd) {
+      productToAdd.quantity++;
     } else {
-      const productToAdd = {
+      productToAdd = {
         ...product,
         quantity: 1,
       };
-      cart.set(product.id, productToAdd);
     }
+    cart[product.id] = productToAdd; // Directly assign the product to the cart
   };
 
   const getCartItems = () => {
-    return Array.from(cart.values());
+    return Object.values(cart);
   };
 
-  fetchProducts();
-
   const removeFromCart = (productId) => {
-    cart.delete(productId);
+    delete cart[productId];
   };
 
   const updateCart = (product) => {
-    if (cart.has(product.id)) {
-      cart.set(product.id, product);
+    if (cart[product.id]) {
+      cart[product.id] = product;
     }
   };
 
   const calculateTotal = () => {
-    return Array.from(cart.values()).reduce((total, product) => {
+    return Object.values(cart).reduce((total, product) => {
       return total + product.price * product.quantity;
     }, 0);
   };
+
+  fetchProducts();
 
   return {
     products,
